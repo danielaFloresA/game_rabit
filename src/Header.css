@@ -1,0 +1,21 @@
+.titulo{
+    /*margin: 5%;*/
+    /*height: 5%;*/
+    color: white;
+  }
+  .buton{
+    font-size: 20px;
+    border: 0px;
+    margin: 5px;
+    color: blue;
+    size: 10px;
+  }
+  .body{
+    background: #5DC1B9;
+    margin: 0 auto;
+  }
+  .numero{
+    position: relative;
+  }
+  
+  
