@@ -1,0 +1,25 @@
+.contenedor-juego {
+    text-align: center
+}
+.tablero{
+    background: lightblue;
+}
+.contenedor-tabla{
+    width: 100%;
+}
+.contenedor-tabla .table{
+    margin: 0 auto;
+}
+.cuadro-activo{
+    background: blue;
+}
+.cuadro-activo2{
+    background: red;
+}
+.btn-jugar {
+    padding: 0.5em 3em
+  }
+
+  .numero {
+      font-size: 5em;
+  }
