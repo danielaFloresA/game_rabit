@@ -1,4 +1,5 @@
 import React from 'react'
+import './Header.css';
 
 function Header ({ appName, user, onAuth, onLogout }) {
   function renderUserData () {
@@ -40,8 +41,8 @@ function Header ({ appName, user, onAuth, onLogout }) {
   }
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <a className="navbar-brand" href="#">Juego de la liebre</a>
+    <nav className="navbar navbar-expand-lg navbar-light bg-light stilo-menu" >
+      <a className="navbar-brand" href="#"><h3 className="titulo-juego font-italic font-weight-bold">Juego de la Liebre</h3></a>
       <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span className="navbar-toggler-icon"></span>
       </button>
