@@ -7,7 +7,7 @@
     font-size: 20px;
     border: 0px;
     margin: 5px;
-    color: blue;
+    color: #007bff;
     size: 10px;
   }
   .body{
@@ -18,4 +18,9 @@
     position: relative;
   }
   
-  
+  .titulo-juego{
+    color: #17a2b8;;
+  }
+  .stilo-menu{
+    background-color: #DEF1ED !important;
+  }
