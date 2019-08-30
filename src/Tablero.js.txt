@@ -29,22 +29,46 @@ export default class Tablero extends React.Component{
             docSnapshot.docs.forEach(function(doc){
                 juego.jugadores.push(doc.data())
             });
+            /*let turno = docSnapshot.data();
+            let juego = this.state.juego;
+            juego.turno = turno.email;
+            let aleatorio = this.state.number; */
             this.setState({juego:juego, number:aleatorio })
         }, err => {
             console.log("Encountered error:", err);
         });
-        // recuperar valores del estado del juego 
-        let documentoRef = firebase.firestore().collection('juego').doc('datos');
-        let observer = documentoRef.onSnapshot(docSnapshot => {
+        // recuperar valor aleatorio
+        let docAleatorio = firebase.firestore().collection('juego').doc('numero_aleatorio');
+        let observerAleatorio = docAleatorio.onSnapshot(docSnapshot => {
             console.log("numero randomico",docSnapshot.data());
-            let datos = docSnapshot.data();
+            let valor_aleatorio = docSnapshot.data();
             let juego = this.state.juego;
-            // set
-            juego.turno = datos.turno;
-            juego.ganador = datos.ganador;
-            let aleatorio = datos.numero_aleatorio;
+            let aleatorio = valor_aleatorio.valor;
             this.setState({juego:juego, number:aleatorio })
 
+        }, err => {
+            console.log("Encountered error:", err);
+        });
+        // recuperar turno 
+        let docTurno = firebase.firestore().collection('juego').doc('turno');
+        let observerTurno = docTurno.onSnapshot(docSnapshot => {
+            console.log("turno",docSnapshot.data());
+            let turno = docSnapshot.data();
+            let juego = this.state.juego;
+            juego.turno = turno.email;
+            let aleatorio = this.state.number;
+            this.setState({juego:juego, number:aleatorio })
+        }, err => {
+            console.log("Encountered error:", err);
+        });
+        let docGanador = firebase.firestore().collection('juego').doc('ganador');
+        let observerGanador = docGanador.onSnapshot(docSnapshot => {
+            console.log("ganador >>>",docSnapshot.data());
+            let ganador = docSnapshot.data();
+            let juego = this.state.juego;
+            juego.ganador = ganador.email;
+            let aleatorio = this.state.number;
+            this.setState({juego:juego, number:aleatorio })
         }, err => {
             console.log("Encountered error:", err);
         });
@@ -58,23 +82,36 @@ export default class Tablero extends React.Component{
     siguienteTurno(juego){
         // email obtener el id 
         let res= null;
-        let jugadoresConectados = juego.jugadores.filter(jugador => jugador.estado == true);
-        for(let i = 0; i < jugadoresConectados.length; i++){
-            if(jugadoresConectados[i].email == juego.turno) {
-                if(i + 1 >= jugadoresConectados.length) {
-                    res = jugadoresConectados[0];
-                } else {
-                    res = jugadoresConectados[i+1];
-                }
+        juego.jugadores.forEach(jugador => {
+            if(jugador.email == juego.turno) {
+                let idJugador = (jugador.id + 1 ) % juego.jugadores.length;
+                console.log(idJugador)
+                juego.jugadores.forEach(jug => {
+                    if(jug.id == idJugador) {
+                        res = jug ;
+                    }
+                });
             }
-        }
+        });
+        
         return res;
+/*        let jugador = jugadores.pop(); 
+        let idJugador = (jugador.id + 1 ) % juego.jugadores.length;
+        console.log("idJugador >>>", idJugador);
+        let jugadorFiltrado = juego.jugadores.filter((jugador) => {
+            if(jugador.id==idJugador){
+                return true;
+            }else return false;
+        })
+        console.log("")
+        return jugadorFiltrado[0]; */
     }
-    updateState(){ 
-        if(this.props.usuario == null){
-            alert("Para jugar tiene que iniciar sesion");
-            return
+    updateState(){
+        if(this.props.usuario.email != this.state.juego.turno) {
+            alert('No es tu turno'); // @TODO Toast
+            return;
         }
+
         if(this.state.juego.ganador){ // reiniciar juego
             let juego = this.state.juego;
             // reiniciar valor actual a 1 
@@ -85,22 +122,17 @@ export default class Tablero extends React.Component{
                         'valorActual' : 1
                     });                    
                 })
-                firebase.firestore().collection("juego").doc("datos").update({
-                    'numero_aleatorio':0,
-                    'ganador': null
+                firebase.firestore().collection("juego").doc("ganador").update({
+                    'email' : ""
                 });
-                
+                firebase.firestore().collection("juego").doc("numero_aleatorio").update({
+                    'valor' : 0
+                });
             }).catch(error => {
                 console.log(error)
             });
             return;
         }
-        if(this.props.usuario.email != this.state.juego.turno) {
-            alert('No es tu turno'); // @TODO Toast
-            return;
-        }
-
-        
         let lanzarNumero = this.getRandom();
         let juego = this.state.juego;
         
@@ -115,19 +147,19 @@ export default class Tablero extends React.Component{
             // establecer ganador del juego
             if(valorActual >= 30) {
                 juego.ganador = juego.turno;
-                const referenceGanador = firebase.firestore().collection("juego").doc("datos");
+                const referenceGanador = firebase.firestore().collection("juego").doc("ganador");
                 referenceGanador.update({
-                    'ganador' : juego.turno
+                    'email' : juego.turno
                 });
             }
             juego.turno= this.siguienteTurno(juego).email;
-            const referenceTurnoSiguiente = firebase.firestore().collection("juego").doc("datos");
+            const referenceTurnoSiguiente = firebase.firestore().collection("juego").doc("turno");
             referenceTurnoSiguiente.update({
-                'turno' : juego.turno
+                'email' : juego.turno
             });
-            const referenceAleatorio = firebase.firestore().collection("juego").doc("datos");
+            const referenceAleatorio = firebase.firestore().collection("juego").doc("numero_aleatorio");
             referenceAleatorio.update({
-                'numero_aleatorio' : lanzarNumero
+                'valor' : lanzarNumero
             });
             this.setState({number: lanzarNumero,juego:juego});
         }).catch(error => console.error(error));
@@ -174,7 +206,7 @@ export default class Tablero extends React.Component{
     render(){
         return(
             <div className='contenedor-juego'>
-                <div className="text-center my-3">turno de jugador: <strong>{this.state.juego.turno}</strong></div>
+                <div className="text-center">turno de jugador: <strong>{this.state.juego.turno}</strong></div>
                 <button className="btn-jugar btn btn-info" onClick={this.updateState}>{this.state.juego.ganador ? 'REINICIAR' : 'JUGAR'  }</button>
                 <h3 className="felicidades">{this.state.juego.ganador ?  ('Felicidades ganaste el juego ' + this.state.juego.ganador) : '' }</h3>
                 <h1 className="numero">{this.state.number}</h1>
